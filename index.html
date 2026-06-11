@@ -419,6 +419,12 @@ async function floatCheatSheet(){
     .say{background:#13231c;border-left:3px solid #36c08b}.say .lbl{color:#36c08b}.say p{margin:3px 0;font-style:italic}
     .warn{background:#2a2113;border-left:3px solid #f0a93b}.warn .lbl{color:#f0a93b}.warn p{margin:3px 0}
     .do{background:#171a21;border-left:3px solid #5b8cff}.do .lbl{color:#5b8cff}.do ol{margin:3px 0;padding-left:18px}.do li{margin:2px 0}
+    .obj{color:#9aa3b2;font-size:12px;margin:-2px 0 8px}
+    .faq{background:#1c1830;border-left:3px solid #7a4ddb;border-radius:8px;padding:6px 10px;margin:8px 0}
+    .faq .lbl{color:#c9b8ff;font-size:9px;letter-spacing:.7px;text-transform:uppercase;font-weight:700;margin-bottom:3px}
+    .faq details{padding:4px 0;border-bottom:1px solid #2c2442}.faq details:last-child{border-bottom:none}
+    .faq summary{cursor:pointer;font-weight:600;color:#c9b8ff;font-size:12px}
+    .faq .ans{color:#9aa3b2;font-size:12px;padding:3px 0 0 6px}
     .nav{position:sticky;bottom:0;display:flex;justify-content:space-between;align-items:center;gap:8px;background:#171a21;padding:8px;border-radius:8px;margin-top:8px}
     .nav button{font:inherit;font-weight:700;border:none;border-radius:6px;padding:6px 14px;background:#5b8cff;color:#fff;cursor:pointer}
     .nav span{color:#9aa3b2;font-size:12px}`;
@@ -449,9 +455,11 @@ function renderPip(){
   const badges=`${PLAN[m.id]?`<span class="b plan">${PLAN[m.id]}</span>`:''}${isEmph(m)?'<span class="b emph">focus</span>':''}${isSkip(m)?`<span class="b skip">${planMet(m)?'optional':'upsell'}</span>`:''}`;
   root.innerHTML=`
     <div class="hd">${m.title} ${badges}</div>
+    ${m.obj?`<div class="obj">${m.obj}</div>`:''}
     ${m.say?`<div class="sec say"><div class="lbl">Say</div>${m.say.map(x=>`<p>"${x}"</p>`).join('')}</div>`:''}
     ${m.warn?`<div class="sec warn"><div class="lbl">⚠ Watch</div>${m.warn.map(x=>`<p>${x}</p>`).join('')}</div>`:''}
     ${m.do?`<div class="sec do"><div class="lbl">Do</div><ol>${m.do.map(x=>`<li>${x}</li>`).join('')}</ol></div>`:''}
+    ${m.faq?`<div class="faq"><div class="lbl">FAQ</div>${m.faq.map(f=>`<details><summary>${f[0]}</summary><div class="ans">${f[1]}</div></details>`).join('')}</div>`:''}
     <div class="nav"><button id="pp">← Back</button><span>${cur+1} / ${STEPS.length}</span><button id="pn">Next →</button></div>`;
   root.scrollTop=0;
   pipWin.document.getElementById('pp').onclick=()=>show(cur-1);
