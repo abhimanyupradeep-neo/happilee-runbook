@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happilee · Product Training Runbook</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1e222b; --line:#2a2f3a;
+    --txt:#e7e9ee; --muted:#9aa3b2; --accent:#5b8cff; --accent2:#36c08b;
+    --warn:#f0a93b; --warnbg:#2a2113; --faq:#3a2a5e; --chip:#232834;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--txt)}
+  header{padding:14px 22px;background:var(--panel);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:10}
+  header h1{font-size:16px;margin:0;font-weight:650;letter-spacing:.2px}
+  header .tag{font-size:11px;color:var(--muted);background:var(--chip);padding:3px 8px;border-radius:20px}
+  .wrap{display:flex;min-height:calc(100vh - 51px)}
+  nav{width:280px;background:var(--panel);border-right:1px solid var(--line);padding:14px 0;overflow-y:auto;max-height:calc(100vh - 51px);position:sticky;top:51px}
+  nav .navitem{padding:9px 18px;cursor:pointer;font-size:13.5px;color:var(--muted);border-left:3px solid transparent;display:flex;justify-content:space-between;gap:8px;align-items:center}
+  nav .navitem:hover{background:var(--panel2);color:var(--txt)}
+  nav .navitem.active{color:var(--txt);border-left-color:var(--accent);background:var(--panel2)}
+  nav .navitem.done{color:var(--accent2)}
+  nav .navitem .emph{font-size:9px;background:var(--accent);color:#fff;border-radius:10px;padding:1px 6px;font-weight:700}
+  nav .navitem .skip{font-size:9px;background:#3a3f4b;color:var(--muted);border-radius:10px;padding:1px 6px}
+  nav .sechead{padding:12px 18px 4px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#6b7484}
+  main{flex:1;padding:26px 34px;max-width:900px;margin:0 auto}
+  .step{display:none}
+  .step.active{display:block;animation:fade .2s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  h2{font-size:23px;margin:0 0 4px}
+  .obj{color:var(--muted);margin:0 0 18px;font-size:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .card h3{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.7px;color:var(--accent)}
+  .say{border-left:3px solid var(--accent2)}
+  .say h3{color:var(--accent2)}
+  .say p{margin:6px 0;font-style:italic}
+  .do ol{margin:6px 0;padding-left:20px}
+  .do li{margin:5px 0}
+  kbd{background:var(--chip);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:12px;font-family:inherit}
+  .warn{background:var(--warnbg);border:1px solid #5a4520;border-left:3px solid var(--warn);border-radius:10px;padding:14px 16px;margin:14px 0}
+  .warn h3{color:var(--warn);margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.7px}
+  .faq{background:#1c1830;border:1px solid #352a52;border-radius:10px;padding:6px 16px;margin:14px 0}
+  .faq details{padding:8px 0;border-bottom:1px solid #2c2442}
+  .faq details:last-child{border-bottom:none}
+  .faq summary{cursor:pointer;font-weight:600;color:#c9b8ff;list-style:none}
+  .faq summary::before{content:"Q  ";color:#8a78c0;font-weight:700}
+  .faq details[open] summary{margin-bottom:6px}
+  .faq .ans{color:var(--muted);padding-left:18px}
+  .footbar{display:flex;justify-content:space-between;align-items:center;margin-top:26px;padding-top:18px;border-top:1px solid var(--line)}
+  button{font:inherit;cursor:pointer;border:none;border-radius:8px;padding:9px 18px;font-weight:600}
+  .btn{background:var(--accent);color:#fff}
+  .btn.ghost{background:var(--panel2);color:var(--txt);border:1px solid var(--line)}
+  .btn:disabled{opacity:.4;cursor:default}
+  .chkrow{display:flex;align-items:center;gap:10px;margin-top:18px;color:var(--muted);font-size:13px}
+  .chkrow input{width:17px;height:17px;accent-color:var(--accent2)}
+  .badge{display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;margin-left:8px;vertical-align:middle}
+  .badge.emph{background:var(--accent);color:#fff}
+  .badge.skip{background:#3a3f4b;color:var(--muted)}
+  .badge.plan{background:#7a4ddb;color:#fff}
+  nav .navitem .plan{font-size:9px;background:#7a4ddb;color:#fff;border-radius:10px;padding:1px 6px;font-weight:700}
+  /* discovery screen */
+  #discovery{max-width:760px;margin:0 auto}
+  .q{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:16px 0}
+  .q .qt{font-weight:650;margin-bottom:4px}
+  .q .qh{font-size:12px;color:var(--muted);margin-bottom:12px}
+  .opts{display:flex;flex-wrap:wrap;gap:8px}
+  .opt{padding:8px 14px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);cursor:pointer;font-size:13.5px}
+  .opt:hover{border-color:var(--accent)}
+  .opt.sel{background:var(--accent);border-color:var(--accent);color:#fff}
+  .summary{background:var(--panel2);border:1px dashed var(--line);border-radius:10px;padding:12px 16px;margin-top:18px;font-size:13px;color:var(--muted);min-height:20px}
+  .pill{display:inline-block;background:var(--accent);color:#fff;border-radius:20px;padding:2px 10px;font-size:12px;margin:2px}
+  .progresswrap{height:4px;background:var(--panel2);border-radius:4px;margin-top:6px;overflow:hidden}
+  .progressbar{height:100%;background:var(--accent2);width:0;transition:width .3s}
+</style>
+</head>
+<body>
+<header>
+  <h1>Happilee · Product Training Runbook</h1>
+  <span class="tag" id="modeTag">Discovery</span>
+  <span class="tag" id="archTag" style="display:none"></span>
+  <div style="flex:1"></div>
+  <button class="btn" id="floatBtn" style="padding:5px 12px;font-size:12px" onclick="floatCheatSheet()">📌 Float cheat-sheet</button>
+  <span class="tag" id="progTxt">0%</span>
+  <button class="btn ghost" style="padding:5px 12px;font-size:12px" onclick="resetAll()">Restart</button>
+</header>
+
+<div class="wrap">
+  <nav id="nav"><!-- filled by JS --></nav>
+  <main>
+    <!-- DISCOVERY -->
+    <section id="discovery">
+      <h2>Start: ask the customer 5 questions</h2>
+      <p class="obj">Open every session with this. Their answers tailor the steps below — emphasized modules get a blue badge, irrelevant ones are dimmed, and a purple badge flags features that need a higher plan (your live upsell cue). You never decide on the fly; the runbook does.</p>
+      <div class="warn" style="margin-bottom:18px"><h3>⚠ Prerequisite check (before you start)</h3>Connecting the number needs: <b>Meta-verified Facebook Business account · valid GST number · business website</b>, then Connect to WhatsApp → Embedded Signup. If any are missing, flag it now — full setup can't complete without them.</div>
+      <div id="qs"></div>
+      <div class="summary" id="discSummary">Pick answers above…</div>
+      <div class="footbar">
+        <span></span>
+        <button class="btn" id="startBtn" disabled onclick="startSession()">Build the session →</button>
+      </div>
+    </section>
+    <!-- STEPS get injected here -->
+    <section id="steps"></section>
+  </main>
+</div>
+
+<script>
+/* ---------- DISCOVERY MODEL ---------- */
+const QUESTIONS = [
+  {id:'screen', t:'Who drives the screen?',
+   h:'Your opening question every session. Decides the whole delivery mode.',
+   opts:[{v:'customer',l:'Customer shares — I guide in their account'},{v:'demo',l:'I share my demo account'}]},
+  {id:'plan', t:'Which plan is the customer on?',
+   h:'Decides which advanced modules to teach vs flag as upsell.',
+   opts:[{v:'basic',l:'Basic'},{v:'growth',l:'Growth'},{v:'advanced',l:'Advanced'}]},
+  {id:'flow', t:'Are leads mostly inbound, or do they push bulk messages out?',
+   h:'Decides Archetype A (inbound qualify) vs B (outbound bulk).',
+   opts:[{v:'inbound',l:'Inbound leads (ads/inquiries)'},{v:'outbound',l:'Outbound bulk list'},{v:'both',l:'Both'}]},
+  {id:'team', t:'Single user, or a team sharing the number?',
+   h:'Decides how deep we go on operators/routing.',
+   opts:[{v:'single',l:'Just me'},{v:'team',l:'A team'},{v:'lang',l:'Team split by language/region'}]},
+  {id:'resell', t:'What recurring message will they send existing customers?',
+   h:'Decides Utility vs Marketing framing for templates.',
+   opts:[{v:'reminders',l:'Reminders / info (Utility)'},{v:'promos',l:'Offers / promos (Marketing)'},{v:'none',l:'Not sure yet'}]},
+  {id:'addon', t:'Any of these special needs?',
+   h:'Each bolts on an extra module. Pick all that apply.', multi:true,
+   opts:[{v:'appt',l:'Appointment booking'},{v:'ai',l:'AI auto-answers'},{v:'ecom',l:'E-commerce / catalog'},{v:'redirect',l:'Just redirect to app/site'},{v:'none',l:'None'}]},
+  {id:'csv', t:'Do they have a contact list to import — and is it clean?',
+   h:'Triggers the CSV-cleaning sub-flow if messy.',
+   opts:[{v:'clean',l:'Yes, clean'},{v:'messy',l:'Yes, but messy'},{v:'no',l:'No list yet'}]}
+];
+let answers={addon:[]};
+
+function renderQs(){
+  const c=document.getElementById('qs');
+  c.innerHTML=QUESTIONS.map(q=>`
+    <div class="q">
+      <div class="qt">${q.t}</div>
+      <div class="qh">${q.h}</div>
+      <div class="opts">${q.opts.map(o=>`<div class="opt" data-q="${q.id}" data-v="${o.v}" data-multi="${!!q.multi}">${o.l}</div>`).join('')}</div>
+    </div>`).join('');
+  c.querySelectorAll('.opt').forEach(o=>o.onclick=()=>{
+    const q=o.dataset.q, v=o.dataset.v, multi=o.dataset.multi==='true';
+    if(multi){
+      answers[q]=answers[q]||[];
+      if(v==='none'){answers[q]=['none']; }
+      else { answers[q]=answers[q].filter(x=>x!=='none'); answers[q].includes(v)?answers[q]=answers[q].filter(x=>x!==v):answers[q].push(v); }
+      document.querySelectorAll(`.opt[data-q="${q}"]`).forEach(e=>e.classList.toggle('sel',answers[q].includes(e.dataset.v)));
+    } else {
+      answers[q]=v;
+      document.querySelectorAll(`.opt[data-q="${q}"]`).forEach(e=>e.classList.toggle('sel',e.dataset.v===v));
+    }
+    updateDisc();
+  });
+}
+function archetype(){
+  if(answers.addon&&answers.addon.includes('redirect')) return 'D';
+  if(answers.team==='lang'||(answers.addon&&(answers.addon.includes('ecom')||answers.addon.includes('ai')))) return 'C';
+  if(answers.flow==='outbound') return 'B';
+  if(answers.flow==='both') return 'A+B';
+  return 'A';
+}
+const ARCH_NAME={A:'Inbound Lead Qualify & Route',B:'Bulk Broadcast & Re-engage','A+B':'Hybrid (qualify + broadcast)',C:'Complex / Multi-language',D:'Minimal Redirect'};
+function updateDisc(){
+  const need=['screen','plan','flow','team','resell','csv'].every(k=>answers[k]);
+  document.getElementById('startBtn').disabled=!need;
+  const a=archetype();
+  const pills=[];
+  if(answers.screen)pills.push(answers.screen==='demo'?'demo-screen':'customer-screen');
+  if(answers.plan)pills.push(answers.plan);
+  if(answers.flow)pills.push(answers.flow); if(answers.team)pills.push(answers.team);
+  if(answers.resell)pills.push(answers.resell); (answers.addon||[]).forEach(x=>x!=='none'&&pills.push(x));
+  if(answers.csv)pills.push('csv:'+answers.csv);
+  document.getElementById('discSummary').innerHTML= need
+    ? `Archetype: <b style="color:#fff">${a} — ${ARCH_NAME[a]}</b><br>${pills.map(p=>`<span class="pill">${p}</span>`).join('')}`
+    : 'Pick answers above…';
+}
+
+/* ---------- THE SPINE (content) ---------- */
+/* emph(): returns true if module should be emphasized for current answers */
+const MODULES=[
+  {id:'project',sec:'Setup',title:'Project list',obj:'Orient them: one number = one project = one subscription.',
+   say:['When you log in, the first screen is the Project list. Think of it simply: one WhatsApp number = one project = one subscription. Click your project to go in — this opens the chat screen.'],
+   do:['Point to the project, click in.','Note: multiple branches/departments = multiple projects under one login.'],
+   faq:[['We have 3 branches — one number or three?','Either works. One number = all branches share an inbox (cheaper, but user-limit per plan). Separate numbers = separate projects.']]},
+
+  {id:'inbox',sec:'Setup',title:'Inbox & the 24-hour window',obj:'The single most-asked-about concept. Nail it.',
+   say:['This is your team inbox — like WhatsApp, chats on the left, conversation on the right.',
+        'See this timer? When a customer messages you, a 24-hour free window opens — you can reply freely, no charge, like normal WhatsApp. Every new customer message resets it.',
+        'After 24 hours the chat expires — "no conversations found." To talk again you must send a paid, pre-approved template (we’ll cover those). Once they reply, a fresh 24-hour window opens.'],
+   do:['Show an open chat + the timer.','Show an expired chat → "Browse Template" to re-engage.','Show the status chips: Open / Resolved / Expired.','To start a chat first: + New Chat → select contact → Browse Template (can’t free-type a first message).'],
+   warn:['<b>Resolved (the status dropdown) does two jobs:</b> (1) closes/filters a finished lead, and (2) <b>pauses the chatbot</b> so a human can take over. Tell them: bot mid-flow and you want in? Set the chat to Resolved. Switch back to Open to re-enable the bot.'],
+   faq:[['After 24 hrs is the old chat history gone?','No — full history stays in the expired chat. You just can’t free-message; you nudge with a template.'],
+        ['Does the customer see "Resolved"?','No, it’s internal — for your filtering and bot control only.'],
+        ['Why won’t my message box let me type?','The 24-hr window expired → use Browse Template to re-engage.']]},
+
+  {id:'operators',sec:'Setup',title:'Users / Operators',obj:'Add the team. Watch the email/phone trap.',
+   say:['If a team shares this number, add them via Operators (top header bar) → invite. The work email + phone you enter is ONLY for their login — the customer never sees who’s replying.',
+        'Set permissions per person — e.g. chat-only, or also Contacts/Broadcast/Chatbot. They get an email → "Set up account" button → login → status active. Admin sees all chats; an operator sees only chats assigned to them.'],
+   do:['Operators (top header) → invite → email + phone → permissions → Save.','Show assignment: round-robin (auto, equal split) vs manual (admin reassigns via operator name top-right of chat) vs availability toggle for leave.','Tip: enable operator-to-operator reassignment in Project Settings → Settings if the team should self-reassign.'],
+   warn:['<b>#2 time-sink.</b> Customers fumble here: "this email/phone is already used", "do I have to give a phone?". <b>Both email + phone are mandatory and must be distinct per operator.</b> Pre-collect each operator’s name/email/phone BEFORE the call to skip the live hunt.'],
+   faq:[['Email & phone both mandatory?','Yes, both. They can be personal — it’s login-only, never shown to customers.'],
+        ['Hide customer phone numbers from operators?','Yes — Project Settings → Settings → enable Phone Number Masking.'],
+        ['Can I route chats to a teammate only when I’m away?','No per-day toggle, but use the Availability switch (off = no chats assigned), or share a dedicated login.'],
+        ['Split chats by language/region?','Yes — that’s a Domain: mark chatbot options as domains, assign each domain to an operator → it overrides round-robin. Used for language/region-split teams.']],
+   emph:a=>a.team!=='single'},
+
+  {id:'tags',sec:'Organize',title:'Tags & segmentation',obj:'How they’ll slice their audience.',
+   say:['Tags categorize leads — hot/warm, or by service/treatment/course. Two ways: add manually here, or — better — auto-tag based on which chatbot option they pick.',
+        'Then filter the chat list or contacts by tag to work one segment at a time. Manage Tags shows how many contacts sit under each.'],
+   do:['Show manual tag add → Save → filter by tag.','Mention auto-tag is set in the chatbot (tag node).'],
+   faq:[['Multiple tags on one contact?','Yes — comma-separate. A contact can sit in several segments.']]},
+
+  {id:'params',sec:'Organize',title:'Parameters (personalization)',obj:'Variables in messages. Demo, don’t lecture.',
+   say:['Parameters are variables in a message — like {{name}} or {{loan amount}} — so one broadcast to 1000 people addresses each personally. Name/phone/lead-source are captured automatically.'],
+   do:['Don’t over-explain here — say "I’ll show it live when we build the broadcast."'],
+   warn:['This always confuses people in the abstract. <b>Skip the deep dive — demo it inside the broadcast step</b> with their real use case (e.g. fintech: {{name}} + {{loan_amount}} due on the 15th).']},
+
+  {id:'notes',sec:'Organize',title:'Notes · Media · Canned replies',obj:'Quick tour of the right-panel tools.',
+   say:['Notes = remarks on a contact (great for operator hand-offs — context follows the lead). Media = files shared in chat. Canned/saved replies = one-click scripted answers so the team isn’t retyping.'],
+   do:['Show Notes add, show canned-reply config + one-click send.'],
+   emph:a=>a.team!=='single'},
+
+  {id:'contacts',sec:'Build',title:'Contacts & Import CSV',obj:'Add the list. THE big menial trap lives here.',
+   say:['Contacts is your CRM. Add one-by-one (name + country code + phone are compulsory; tags recommended), or bulk Import CSV.',
+        'For import: download the sample format, delete the dummy rows 2 & 3, paste your name/country-code/number. Never rename the 5 column headers, even if you don’t use tags/birthday. No "+" on the country code. Comma-separate multiple tags. Up to 10,000 per file.'],
+   do:['Import CSV → download sample → delete dummy rows → paste data → upload → Import → refresh.','Show lead-source column (organic / directly-added / CSV / CTW).'],
+   warn:['⚠️ <b>#1 TIME-SINK: dirty CSV.</b> Customer files arrive with country codes glued to numbers, blanks, junk. Live fix = paste the country-code-split Google-Sheet formula and clean together (this eats 5–10 min). <b>Best practice: send them the cleaning template + formula BEFORE the call so the list is import-ready.</b> If messy and no pre-work, budget time and screen-share the formula.'],
+   faq:[['If I re-import the same number, does it duplicate?','No — an existing number won’t be re-added (even under a new tag).'],
+        ['Do I need the "+" on country code?','No — just the digits, e.g. 971… not +971…'],
+        ['What if some numbers have no country code?','Split/clean them with the formula first, or they’ll fail on broadcast.'],
+        ['Why did my whole import fail?','You renamed a column header, or didn’t save as .csv. Headers must stay exactly as downloaded.'],
+        ['Can I broadcast straight from a CSV?','Yes, at the recipient step — but Broadcast-from-CSV needs Growth plan or above.']],
+   emph:a=>a.flow!=='inbound'||a.csv!=='no'},
+
+  {id:'templates',sec:'Build',title:'Templates & categories',obj:'The category question comes up every time.',
+   say:['To broadcast, you first need a Meta-approved template. Three categories: Marketing (promos/sales), Utility (reminders/info to existing customers — cheaper), Authentication (OTP).',
+        'Create → name it → pick category → content type (media-interactive is best: image header + buttons). Buttons: a "stop-promotion" button protects you from spam reports, plus visit-website, call, copy-offer-code, or a custom "chat with us" that triggers your bot.',
+        'Submit for approval (5 min–24 hr). Heads-up: once approved you can’t edit — you delete and recreate.'],
+   do:['Create template → category → media-interactive → add image + buttons → submit.','Show a pending + an approved template.'],
+   warn:['⚠️ <b>"Marketing or Utility?" — asked in almost every session.</b> Rule to say out loud: <b>"Promoting to win business = Marketing. Reminder/info to existing customers = Utility."</b> If you put a promo in Utility, Meta auto-switches it to Marketing.'],
+   faq:[['Can I edit an approved template?','No — delete and recreate. So finalize before submitting.'],
+        ['Why is approval taking long?','Utility/marketing + media/regional language take longer to review (up to 24 hr); plain text ~5–10 min.'],
+        ['Can’t I put text under each carousel card?','Each card has its own body; the broadcast has one body on top.']]},
+
+  {id:'broadcast',sec:'Build',title:'Broadcast & the batch strategy',obj:'Send it — and protect their number.',
+   say:['Broadcast two ways: from your contact list (filter by tag) or external CSV. Pick the approved template, map parameters, initiate.',
+        'Critical: Meta only delivers ~70–80% even to a good list — that’s their "healthy ecosystem" cap, not a bug. And for NEW/unsaved numbers, don’t blast 2000 at once.'],
+   do:['New broadcast → recipients (contact list filtered by tag, OR import CSV) → name it (toggle Schedule for later) → Browse Template → Save & Next.','If the template has variables: click <b>Dynamic Binding</b> → it generates a CSV with a column per {{variable}} → paste values → upload.','Finish → select <b>Cloud Business API</b> → Initiate.','Show analytics: sent / delivered / read / replied (= button clicks) / failed → Download CSV for failure reasons.'],
+   warn:['<b>Batch-by-batch warm-up (say this every time for outbound):</b> for unsaved numbers, send 30 at a time. Make the FIRST message "save our new WhatsApp number" + a stop-promotion button. This builds reputation, avoids spam reports, and protects delivery rate before you push real campaigns.'],
+   faq:[['Why did some messages fail?','Download CSV → reasons: "healthy ecosystem" throttle (the 80% cap), wrong/no-WhatsApp number, or payment-eligibility (no card added).'],
+        ['What counts as a "reply" in analytics?','Button clicks — not typed text.'],
+        ['How many per broadcast?','Up to 10,000/file, but warm up unsaved numbers in batches of 30.']],
+   emph:a=>a.flow!=='inbound'},
+
+  {id:'chatbot',sec:'Build',title:'Chatbot (qualification)',obj:'Teach the CONCEPT + the offload. Don’t build live.',
+   say:['The chatbot handles first response 24/7 and qualifies leads: welcome → option buttons → auto-tag → (optional) push to a Google Sheet → assign to an operator.',
+        'The flow canvas is powerful but fiddly. So here’s the easy path: send us a simple doc/flowchart of how you want it to qualify — what to ask, what buttons — and our team builds it in your account, tests it with you, and enables it. You don’t have to learn the builder.'],
+   do:['Open a flow: Root node → Button/List (choices) → Simple Question (free text) → Tag node (auto-tag) → Google-Sheet node (Growth+) → assign.','Triggering: <b>Triggered toggle</b> = default bot (only ONE at a time) vs <b>Keyword Actions</b> = many bots by keyword (menu-bot → per-department pattern).','Mention <b>Secondary Chat Flows</b> (Chatbot → Settings) = after-hours bot by timezone/hours/days.'],
+   warn:['<b>Standard offload (use it):</b> you say "send us a flowchart, we’ll build it" in ~9/14 sessions. Make it the default — it shortens the call and removes the hardest-to-teach part. Hand them the 1-page "chatbot blueprint" template.'],
+   faq:[['Can the bot answer freely with AI?','Yes — ChatGPT node + a Data Source (OpenAI key + uploaded PDFs) = RAG. <b>Advanced plan.</b> No website refs — must be docs.'],
+        ['Default vs keyword trigger?','Triggered = any incoming message (only one bot at a time). Keyword = a specific word/button fires a specific flow. Start Triggered, add Keyword Actions for a second flow.'],
+        ['Why isn’t my bot responding?','Triggered toggle off, OR the chat was manually assigned to a person (set it back to Open).'],
+        ['Flow won’t save?','A node is disconnected — every node needs a path out.'],
+        ['Button vs List node?','Button = up to 3 choices; List = scrollable menu for more than 3.']]},
+
+  {id:'business',sec:'Build',title:'Business / QR code',obj:'Quick — only if they have offline/print touchpoints.',
+   say:['The Business section makes a QR code tied to a chatbot flow with a pre-filled message — for posters, stores, events. Scan → opens WhatsApp → bot greets them.'],
+   do:['New business → name → category → pick the chatbot flow → add logo → download QR.'],
+   emph:a=>false},
+
+  {id:'scheduler',sec:'Add-ons',title:'Scheduler / Drip campaigns',obj:'Automated nurture sequences. Teach in full when on Advanced.',
+   say:['A broadcast goes out once; a Schedule runs in the background, auto-sending templates to the right contacts at the right time — welcome drips, re-engagement, appointment reminders, post-call follow-ups.',
+        'Before you start: the templates you’ll drip must already be created and approved in Broadcast → Templates.'],
+   do:['Scheduling → New Schedule → name it → set trigger: Contact Created / Last Interaction / Specific Interval → set timezone → Save.','Open the schedule → set audience via Primary Filters (Tags / Domains / Business / Parameters).','New Itinerary → pick Interval Type (Birthday / Monthly / Weekly / Specific Month) → Browse Template → Save Changes. Repeat per step.','Toggle each itinerary (and the schedule) Active.'],
+   warn:['<b>Examples to offer:</b> 7-day welcome drip on tag "new-lead"; re-engage tag "inactive-30d" with an offer; reminder to "appointment-booked" the day before. Concrete examples sell this feature.'],
+   faq:[['Does the drip cost extra?','No — it’s included in the Advanced plan, not a separate add-on.'],
+        ['Scheduled messages not firing?','Check: schedule Active? each itinerary Active? do any contacts match the tag/domain/filter? If none match, nothing sends.'],
+        ['Going out at the wrong time?','Edit Schedule → fix the timezone.'],
+        ['Same message arriving repeatedly?','The itinerary frequency is set to repeat — adjust it.']],
+   emph:a=>a.plan==='advanced'},
+
+  {id:'datasource',sec:'Add-ons',title:'Data Source (AI knowledge base)',obj:'Powers the ChatGPT/AI chatbot. Teach when AI is wanted (Advanced).',
+   say:['Data Source is where you set up the brain for an AI chatbot. The AI reads documents you upload (product info, FAQs, pricing, guides) and answers customer questions from YOUR business info — not generic knowledge. That’s RAG.',
+        'It only matters if you’ll use a ChatGPT node in a flow. If you’re not using AI, skip it.'],
+   do:['Data Source → Accounts tab → add your OpenAI API key.','Data Source tab → upload your business docs (PDFs).','Optionally configure prompts (e.g. "only answer about our services; send pricing to a human").','Then use a ChatGPT node inside a chatbot flow.'],
+   warn:['<b>PDF/docs only — not website links.</b> If they want the bot to "read our website," they must convert it to a PDF/doc first. Setting up + tuning the prompt takes effort — set expectations or offload to your team.'],
+   faq:[['What plan includes AI?','ChatGPT / Data Source is Advanced plan only.'],
+        ['What is RAG?','The AI retrieves answers from your uploaded docs instead of guessing from general knowledge — so replies are accurate to your business.']],
+   emph:a=>a.plan==='advanced'||(a.addon&&a.addon.includes('ai'))},
+
+  {id:'advanced',sec:'Add-ons',title:'Other advanced & Store apps',obj:'Quick mention of the rest, by relevance.',
+   say:['Also available: API node + third-party CRM/Shopify integrations (Advanced, Project Settings → Integrations), MMLite for faster/higher delivery (Project Settings → Settings), and e-commerce/catalog + WhatsApp payments.',
+        'Store apps extend Happilee: Appointment Booking, FB Leads, Ecommerce, AreaSense (delivery-zone check), AgenticChat & YWAIT (coming soon).'],
+   do:['Mention only the ones relevant to their answers (e-commerce, integrations, FB Leads).'],
+   faq:[['How do I connect my CRM/Shopify?','Project Settings → Integrations → generate API key + webhooks (Advanced; contact support for custom).']],
+   emph:a=>(a.addon&&(a.addon.includes('ecom')))||a.team==='lang'},
+
+  {id:'wrap',sec:'Close',title:'Wrap & next steps',obj:'End every session the same way.',
+   say:['Quick recap of what we covered. Daily, you’ll live in: chat list, contacts, broadcast. Next step from your side: send our team the chatbot blueprint (+ contact list if not done) so we build and enable your flow.',
+        'I’m recording this session and will send it to you on WhatsApp/email so you can refer back. Support number is there for anything urgent.'],
+   do:['Confirm chatbot blueprint hand-off.','Share recording + YouTube help links + support contact.','Confirm any pending: appointments setup, CSV import, integration asks.']}
+];
+
+/* APPOINTMENT add-on injected if chosen */
+const APPT={id:'appt',sec:'Add-ons',title:'Appointment booking',obj:'Bolt-on for clinics/services.',
+  say:['Customers book right inside WhatsApp: "hi" → Book appointment → pick doctor/service + time slot → optional consultation fee → automatic reminders before the appointment. You just log in and view the day’s appointments.'],
+  do:['Show/configure appointment schedules.','Discuss optional integration to push bookings into their existing clinic software.'],
+  faq:[['Will bookings sync to our clinic software?','Independent by default; we can integrate so WhatsApp bookings reflect in your software (tech-team confirm).']]};
+const REDIRECT={id:'redirect',sec:'Build',title:'Minimal redirect flow',obj:'Lightweight: just route to app/site.',
+  say:['Simplest flow: hi → language → city/option → a single CTA button that opens your app (device-aware: iOS→App Store, Android→Play) or website. No qualification, no broadcast needed yet.'],
+  do:['Chatbot → view flow → edit the CTA/app-link node → publish.','Use one smart link that detects the device.'],
+  faq:[['Can a button open my mobile app directly?','Deep-link/redirect to the store (device-aware). Direct in-app open isn’t supported — route via store/website.']]};
+
+/* SCREEN-CONTROL — the very first step; injected based on the discovery answer */
+const SCREEN_CUSTOMER={id:'screen',sec:'Setup',title:'Screen control — customer drives',obj:'They share their screen; you guide them to set up their real account live.',
+  say:['Perfect — go ahead and log into Happilee at app.happilee.io and share your screen. I’ll walk you through each step in your own account, so by the end it’s actually set up and live — not just demoed.'],
+  do:['Confirm: are you logged in? Can I see your screen clearly?','You DIRECT, they CLICK. Name the exact button each time ("bottom-left, the chat icon").','If login/OTP issues: help them in first, or fall back to your demo screen for the concepts.'],
+  warn:['<b>This path leaves them set up — but it’s slower</b> because the product is hard for a first-timer to navigate. Go slow, name exact buttons, and lean on the offloads (we build the chatbot; pre-clean the CSV) to keep it moving. Do the screen-share check NOW to avoid the "can you see my screen?" fumble mid-session.'],
+  faq:[['They’re stuck navigating / lost?','Take back the lead verbally — name the section + button. If it stalls, switch to your demo screen for that part and have them replicate after.']]};
+const SCREEN_DEMO={id:'screen',sec:'Setup',title:'Screen control — you demo',obj:'You share your demo account and walk through; they replicate after.',
+  say:['No problem — I’ll share my screen with our demo account and walk you through each section. You’ll be able to set yours up the same way after, and I’ll send you the recording so you can follow along step by step.'],
+  do:['Share YOUR demo account screen.','Narrate each module as you click; pause for questions.','Tell them up front: you’ll send the recording + help-video links + support number.'],
+  warn:['<b>Trade-off: they DON’T end up set up live.</b> So you MUST: (1) send the recording, (2) collect the chatbot blueprint + their contact list so your team builds/imports for them, and (3) ideally book a short follow-up to confirm they got it running. Otherwise the session feels done but nothing’s live on their side.'],
+  faq:[['Should I demo or let them drive?','Let them drive (customer-screen) when they’re logged in and have time — it leaves them set up. Demo when they can’t log in, are short on time, or it’s a first-look. You can switch mid-session.']]};
+
+/* plan-gating (from official help docs) — shows trainer the upsell cue live */
+const PLAN={params:'Growth+',notes:'Growth+',business:'Growth+',scheduler:'Advanced',datasource:'Advanced',advanced:'Advanced',appt:'Store app'};
+function planBadge(m){return PLAN[m.id]?`<span class="badge plan">${PLAN[m.id]}</span>`:'';}
+const PLAN_REQ={params:'growth',notes:'growth',business:'growth',scheduler:'advanced',datasource:'advanced',advanced:'advanced'};
+const PLAN_RANK={basic:1,growth:2,advanced:3};
+function planMet(m){const req=PLAN_REQ[m.id]; if(!req||!answers.plan)return true; return PLAN_RANK[answers.plan]>=PLAN_RANK[req];}
+
+/* build the active module list based on answers */
+let STEPS=[], cur=0, done=new Set(), pipWin=null;
+function buildSteps(){
+  let list=MODULES.slice();
+  // inject add-ons
+  if(answers.addon){
+    if(answers.addon.includes('appt')){const i=list.findIndex(m=>m.id==='chatbot'); list.splice(i+1,0,APPT);}
+    if(answers.addon.includes('redirect')){const i=list.findIndex(m=>m.id==='chatbot'); list.splice(i+1,0,REDIRECT);}
+  }
+  // screen-control is always the FIRST step, variant by answer
+  list.unshift(answers.screen==='demo'?SCREEN_DEMO:SCREEN_CUSTOMER);
+  STEPS=list;
+}
+function isEmph(m){return m.emph?m.emph(answers):false;}
+function isSkip(m){
+  if(!planMet(m))return true; // feature above their plan → optional (pitch as upsell; purple badge shows the plan)
+  if(answers.flow==='inbound'&&m.id==='broadcast'&&answers.csv==='no')return true;
+  if(answers.addon&&answers.addon.includes('redirect')&&['broadcast','templates','contacts','advanced','business','scheduler','datasource'].includes(m.id))return true;
+  if(['scheduler','datasource','advanced'].includes(m.id)&&!isEmph(m))return true;
+  return false;
+}
+
+function startSession(){
+  buildSteps();
+  document.getElementById('discovery').style.display='none';
+  document.getElementById('steps').style.display='block';
+  document.getElementById('modeTag').textContent='Live session';
+  const a=archetype();
+  const at=document.getElementById('archTag'); at.style.display='inline-block';
+  at.textContent='Archetype '+a+' · '+ARCH_NAME[a];
+  renderSteps(); renderNav(); show(0);
+}
+function renderSteps(){
+  document.getElementById('steps').innerHTML=STEPS.map((m,i)=>`
+    <div class="step" id="step${i}">
+      <h2>${m.title}${planBadge(m)}${isEmph(m)?'<span class="badge emph">Emphasize</span>':''}${isSkip(m)?'<span class="badge skip">'+(planMet(m)?'Optional / skip':'Upsell opportunity')+'</span>':''}</h2>
+      <p class="obj">${m.obj}</p>
+      ${m.say?`<div class="card say"><h3>Say</h3>${m.say.map(s=>`<p>"${s}"</p>`).join('')}</div>`:''}
+      ${m.do?`<div class="card do"><h3>Do (on screen)</h3><ol>${m.do.map(d=>`<li>${d}</li>`).join('')}</ol></div>`:''}
+      ${m.warn?m.warn.map(w=>`<div class="warn"><h3>⚠ Watch out</h3>${w}</div>`).join(''):''}
+      ${m.faq?`<div class="faq">${m.faq.map(f=>`<details><summary>${f[0]}</summary><div class="ans">${f[1]}</div></details>`).join('')}</div>`:''}
+      <div class="chkrow"><input type="checkbox" id="chk${i}" onchange="toggleDone(${i})"><label for="chk${i}">Mark this module covered</label></div>
+      <div class="footbar">
+        <button class="btn ghost" onclick="show(${i-1})" ${i===0?'disabled':''}>← Back</button>
+        <button class="btn" onclick="next(${i})">${i===STEPS.length-1?'Finish ✓':'Next →'}</button>
+      </div>
+    </div>`).join('');
+}
+function renderNav(){
+  let html='', lastSec='';
+  STEPS.forEach((m,i)=>{
+    if(m.sec!==lastSec){html+=`<div class="sechead">${m.sec}</div>`;lastSec=m.sec;}
+    const planb=PLAN[m.id]?`<span class="plan">${PLAN[m.id]}</span>`:'';
+    const badge=planb+(isEmph(m)?'<span class="emph">focus</span>':isSkip(m)?'<span class="skip">opt</span>':'');
+    html+=`<div class="navitem ${i===cur?'active':''} ${done.has(i)?'done':''}" id="nav${i}" onclick="show(${i})"><span>${done.has(i)?'✓ ':''}${m.title}</span><span style="display:flex;gap:4px">${badge}</span></div>`;
+  });
+  document.getElementById('nav').innerHTML=html;
+}
+function show(i){
+  if(i<0||i>=STEPS.length)return;
+  cur=i;
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('step'+i).classList.add('active');
+  renderNav(); renderPip(); window.scrollTo(0,0);
+}
+
+/* ---------- FLOATING CHEAT-SHEET (always-on-top teleprompter) ---------- */
+async function floatCheatSheet(){
+  if(!STEPS.length){alert('Build the session first — answer the questions and click "Build the session".');return;}
+  if(!('documentPictureInPicture' in window)){
+    alert('The floating cheat-sheet needs Chrome or Edge (latest version).\n\nAlternative: open this runbook on a second device (phone/tablet) beside you.');
+    return;
+  }
+  if(pipWin&&!pipWin.closed){pipWin.focus();return;}
+  pipWin=await documentPictureInPicture.requestWindow({width:400,height:600});
+  const s=pipWin.document.createElement('style');
+  s.textContent=`
+    body{margin:0;font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0f1115;color:#e7e9ee}
+    #r{padding:12px 14px}
+    .hd{font-size:15px;font-weight:650;margin-bottom:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+    .b{font-size:9px;padding:1px 6px;border-radius:10px;font-weight:700}
+    .b.plan{background:#7a4ddb;color:#fff}.b.emph{background:#5b8cff;color:#fff}.b.skip{background:#3a3f4b;color:#9aa3b2}
+    .sec{margin:8px 0;border-radius:8px;padding:8px 10px}
+    .lbl{font-size:9px;letter-spacing:.7px;text-transform:uppercase;font-weight:700;margin-bottom:3px}
+    .say{background:#13231c;border-left:3px solid #36c08b}.say .lbl{color:#36c08b}.say p{margin:3px 0;font-style:italic}
+    .warn{background:#2a2113;border-left:3px solid #f0a93b}.warn .lbl{color:#f0a93b}.warn p{margin:3px 0}
+    .do{background:#171a21;border-left:3px solid #5b8cff}.do .lbl{color:#5b8cff}.do ol{margin:3px 0;padding-left:18px}.do li{margin:2px 0}
+    .nav{position:sticky;bottom:0;display:flex;justify-content:space-between;align-items:center;gap:8px;background:#171a21;padding:8px;border-radius:8px;margin-top:8px}
+    .nav button{font:inherit;font-weight:700;border:none;border-radius:6px;padding:6px 14px;background:#5b8cff;color:#fff;cursor:pointer}
+    .nav span{color:#9aa3b2;font-size:12px}`;
+  pipWin.document.head.appendChild(s);
+  const root=pipWin.document.createElement('div');root.id='r';
+  pipWin.document.body.appendChild(root);
+  pipWin.addEventListener('pagehide',()=>{pipWin=null;});
+  renderPip();
+}
+function renderPip(){
+  if(!pipWin||pipWin.closed)return;
+  const m=STEPS[cur];
+  const badges=`${PLAN[m.id]?`<span class="b plan">${PLAN[m.id]}</span>`:''}${isEmph(m)?'<span class="b emph">focus</span>':''}${isSkip(m)?`<span class="b skip">${planMet(m)?'optional':'upsell'}</span>`:''}`;
+  const root=pipWin.document.getElementById('r');
+  root.innerHTML=`
+    <div class="hd">${m.title} ${badges}</div>
+    ${m.say?`<div class="sec say"><div class="lbl">Say</div>${m.say.map(x=>`<p>"${x}"</p>`).join('')}</div>`:''}
+    ${m.warn?`<div class="sec warn"><div class="lbl">⚠ Watch</div>${m.warn.map(x=>`<p>${x}</p>`).join('')}</div>`:''}
+    ${m.do?`<div class="sec do"><div class="lbl">Do</div><ol>${m.do.map(x=>`<li>${x}</li>`).join('')}</ol></div>`:''}
+    <div class="nav"><button id="pp">← Back</button><span>${cur+1} / ${STEPS.length}</span><button id="pn">Next →</button></div>`;
+  root.scrollTop=0;
+  pipWin.document.getElementById('pp').onclick=()=>show(cur-1);
+  pipWin.document.getElementById('pn').onclick=()=>show(cur+1);
+}
+function next(i){ if(i<STEPS.length-1) show(i+1); else finish(); }
+function toggleDone(i){ document.getElementById('chk'+i).checked?done.add(i):done.delete(i); updateProg(); renderNav(); }
+function updateProg(){
+  const p=Math.round(done.size/STEPS.length*100);
+  document.getElementById('progTxt').textContent=p+'%';
+}
+function finish(){ alert('Session complete — '+done.size+'/'+STEPS.length+' modules covered.\n\nDon’t forget: collect the chatbot blueprint + share the recording.'); }
+function resetAll(){
+  answers={addon:[]}; cur=0; done=new Set();
+  document.getElementById('discovery').style.display='block';
+  document.getElementById('steps').style.display='none';
+  document.getElementById('steps').innerHTML='';
+  document.getElementById('nav').innerHTML='';
+  document.getElementById('modeTag').textContent='Discovery';
+  document.getElementById('archTag').style.display='none';
+  document.getElementById('progTxt').textContent='0%';
+  renderQs(); updateDisc();
+}
+/* init */
+renderQs(); updateDisc();
+</script>
+</body>
+</html>
