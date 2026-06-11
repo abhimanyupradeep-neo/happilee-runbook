@@ -175,6 +175,7 @@ function updateDisc(){
   document.getElementById('discSummary').innerHTML= need
     ? `Archetype: <b style="color:#fff">${a} — ${ARCH_NAME[a]}</b><br>${pills.map(p=>`<span class="pill">${p}</span>`).join('')}`
     : 'Pick answers above…';
+  renderPip();
 }
 
 /* ---------- THE SPINE (content) ---------- */
@@ -400,7 +401,6 @@ function show(i){
 
 /* ---------- FLOATING CHEAT-SHEET (always-on-top teleprompter) ---------- */
 async function floatCheatSheet(){
-  if(!STEPS.length){alert('Build the session first — answer the questions and click "Build the session".');return;}
   if(!('documentPictureInPicture' in window)){
     alert('The floating cheat-sheet needs Chrome or Edge (latest version).\n\nAlternative: open this runbook on a second device (phone/tablet) beside you.');
     return;
@@ -430,9 +430,23 @@ async function floatCheatSheet(){
 }
 function renderPip(){
   if(!pipWin||pipWin.closed)return;
+  const root=pipWin.document.getElementById('r');
+  // --- DISCOVERY MODE (session not built yet) ---
+  if(!STEPS.length){
+    const need=['screen','plan','flow','team','resell','csv'].every(k=>answers[k]);
+    root.innerHTML=`
+      <div class="hd">Discovery — ask these</div>
+      ${QUESTIONS.map(q=>{
+        const sel=q.multi?(answers[q.id]||[]):[answers[q.id]];
+        return `<div class="sec do"><div class="lbl">${q.t}</div>${q.opts.map(o=>`<div style="padding:1px 0;${sel.includes(o.v)?'color:#36c08b;font-weight:700':'color:#9aa3b2'}">${sel.includes(o.v)?'✓ ':'• '}${o.l}</div>`).join('')}</div>`;
+      }).join('')}
+      <div class="nav"><span>${need?'✓ Ready — click "Build the session" in the main window':'Select answers in the main window'}</span></div>`;
+    root.scrollTop=0;
+    return;
+  }
+  // --- STEP MODE (session built) ---
   const m=STEPS[cur];
   const badges=`${PLAN[m.id]?`<span class="b plan">${PLAN[m.id]}</span>`:''}${isEmph(m)?'<span class="b emph">focus</span>':''}${isSkip(m)?`<span class="b skip">${planMet(m)?'optional':'upsell'}</span>`:''}`;
-  const root=pipWin.document.getElementById('r');
   root.innerHTML=`
     <div class="hd">${m.title} ${badges}</div>
     ${m.say?`<div class="sec say"><div class="lbl">Say</div>${m.say.map(x=>`<p>"${x}"</p>`).join('')}</div>`:''}
@@ -451,7 +465,7 @@ function updateProg(){
 }
 function finish(){ alert('Session complete — '+done.size+'/'+STEPS.length+' modules covered.\n\nDon’t forget: collect the chatbot blueprint + share the recording.'); }
 function resetAll(){
-  answers={addon:[]}; cur=0; done=new Set();
+  answers={addon:[]}; cur=0; done=new Set(); STEPS=[];
   document.getElementById('discovery').style.display='block';
   document.getElementById('steps').style.display='none';
   document.getElementById('steps').innerHTML='';
